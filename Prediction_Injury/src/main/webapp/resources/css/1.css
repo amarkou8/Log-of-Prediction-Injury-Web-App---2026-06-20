@@ -1,0 +1,131 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : Jun 15, 2026, 10:37:10 AM
+    Author     : asdv5
+*/
+
+
+/* Selects the save button specifically inside the custom container class */
+.hide-inplace-save .ui-inplace-save
+{
+    display: none !important;
+}
+/* Target the clickable display state of your specific inplace component */
+.blue-inplace .ui-inplace-display {
+    background-color: #2196F3 !important; /* Saga Theme Primary Blue */
+    color: #ffffff !important;            /* White text for contrast */
+    padding: 6px 12px;                    /* Matches default button padding */
+    border-radius: 4px;                   /* Matches default button rounded edges */
+    font-weight: 500;
+    font-family: Arial;
+}
+/* Emulates the button hover effect from the Saga theme */
+.blue-inplace .ui-inplace-display:hover {
+    background-color: #0d8bf2 !important; /* Slightly darker blue on hover */
+}
+.asdvHeader
+{
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    background-color: #ffffff;
+    color:  #747474;
+    padding: 15px 0;
+    height:6rem;
+}
+
+.headerClass
+{
+    font-family: Arial, sans-serif;
+    color: #747474;
+    text-align: center;
+}
+
+.asdvFooter
+{
+    font-family: Arial, sans-serif;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    background-color: #ffffff;
+    color: #747474;
+    padding: 15px 0;
+}
+
+
+.line-container {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 30px 0 0 0;
+}
+.line-container::before,
+.line-container::after {
+    content: '';
+    flex: 1;
+    border-bottom: 4px solid #ccc; /* Line thickness and color */
+}
+.line-title {
+    padding: 0 15px; /* Spacing between the text and the lines */
+    font-family: Arial;
+    font-weight: bold;
+    color: #747474; /* Text color */
+}
+
+/* Target the dialog background, title bar, and content area */
+            .red-dialog,
+            .red-dialog .ui-dialog-titlebar,
+            .red-dialog .ui-dialog-content,
+            .red-dialog .ui-dialog-buttonpane {
+                background-color: #f70d1a !important; /* A nice red */
+                color: #fff !important; /* Make text readable */
+                border-color: darkred !important;
+            }
+
+            /* Ensure the text and icons inside are also white */
+            .red-dialog .ui-dialog-title,
+            .red-dialog .ui-icon {
+                color: #fff !important;
+            }
+
+
+            /* Green dialog */
+            .green-dialog,
+            .green-dialog .ui-dialog-titlebar,
+            .green-dialog .ui-dialog-content,
+            .green-dialog .ui-dialog-buttonpane {
+                background-color: #80c883 !important; /* A nice red */
+                color: white !important; /* Make text readable */
+                border-color: darkred !important;
+            }
+
+            /* Ensure the text and icons inside are also white */
+            .green-dialog .ui-dialog-title,
+            .green-dialog .ui-icon {
+                color: white !important;
+            }
+
+            /* Blue dialog */
+            .blue-dialog,
+            .blue-dialog .ui-dialog-titlebar,
+            .blue-dialog .ui-dialog-content,
+            .blue-dialog .ui-dialog-buttonpane {
+                background-color: #6060fa !important; 
+                color: white !important; /* Make text readable */
+                border-color: darkred !important;
+            }
+
+            /* Ensure the text and icons inside are also white */
+            .blue-dialog .ui-dialog-title,
+            .blue-dialog .ui-icon {
+                color: white !important;
+            }
+
+
+

@@ -1,0 +1,864 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces"
+      xmlns:f="jakarta.faces.core">
+    <h:head>
+        <title> Predictor </title>
+        <h:outputStylesheet library="css" name="1.css"/>           
+
+        <style>
+            .ui-growl {
+                top: auto !important;
+                right: auto !important;
+                bottom: 8px !important;
+                left: 2px !important;
+            }
+        </style>
+
+    </h:head>
+    <h:body>
+        <p:growl id="id_growl" showDetail="true" />
+
+        <header class="asdvHeader">
+            <h1 class="headerClass"> Multimodal Sports Athlete-Injury Predictor </h1> 
+            <h3 class="headerClass"> ASDV @ South Louisiana Community College </h3>
+        </header>
+        <h:form>
+            <div style="display: flex; justify-content: center; width: 100%; padding-top: 2rem;">
+
+                <p:commandButton 
+                    value="Home"
+                    icon ="pi pi-home"
+                    action="#{predictorBean.home()}" 
+                    style="margin-bottom:1em; margin-right: 4em;"
+                    />
+                <p:commandButton ajax="false"
+                                 icon="pi pi-star"
+                                 value="Predict risk of injury" 
+                                 action="#{predictorBean.predictRisk()}" 
+                                 style="margin-bottom:1em; margin-right: 4em;"
+                                 />
+
+                <p:commandButton ajax="false"
+                                 icon="pi pi-times-circle"
+                                 value="Reset" 
+                                 action="#{predictorBean.resetToDefaultValues()}" 
+                                 style="margin-bottom:1em;"
+                                 />
+
+            </div>
+
+            <div style="display: flex;
+                 width: fit-content;
+                 align-self: baseline;
+                 justify-items: flex-start;
+                 justify-content: space-evenly;
+                 flex-direction: row; ">
+
+                <fieldset style=" border: 1px solid #d3d3d3; padding:20px 10px;
+                          width:fit-content; min-width: 250px; border-radius: 8px;
+                          color: #747474; background-color: #ffffff;">
+
+                    <legend style="padding: 0 8px; font-family: Arial;
+                            color: #747474; margin-left: 10px; font-weight: bold;">
+                        Metadata
+                    </legend>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-top:0px;
+                                 margin-bottom: 5px; width: 100%;">   
+
+                        <p:selectOneRadio id="id_gender" 
+                                          value="#{predictorBean.gender}"
+                                          columns="2" 
+                                          layout="responsive"
+                                          required="true"
+                                          requiredMessage="Gender required"
+                                          >
+                            <f:selectItem itemLabel="Male" itemValue="MALE" />
+                            <f:selectItem itemLabel="Female" itemValue="FEMALE" />
+                            <p:ajax event="valueChange" process="@this" update="id_growl" 
+                                    listener="#{predictorBean.onClickedGender}"/>
+                        </p:selectOneRadio>      
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;
+                                 border-top: 1px solid lightgray; ">   
+
+
+                        <p:selectOneRadio id="id_sportType" value="#{predictorBean.sportType}"
+                                          columns="2" 
+                                          layout="responsive"
+                                          required="true"
+                                          requiredMessage="Sport type required">
+
+                            <f:selectItem itemLabel="Basketball" itemValue="BASKETBALL" />
+                            <f:selectItem itemLabel="Track" itemValue="TRACK" />
+                            <f:selectItem itemLabel="Soccer" itemValue="SOCCER" />
+                            <f:selectItem itemLabel="Other sport" itemValue="OTHER" />          
+                            <p:ajax event="valueChange" 
+                                    process="@this" update="id_growl" 
+                                    listener="#{predictorBean.onClickedSportType}"/>
+                        </p:selectOneRadio>      
+                    </p:panelGrid>          
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; margin-top:20px;
+                                 width: 100%;"
+                                 >   
+
+                        <p:spinner id="id_age"
+                                   title="Athlete's age."
+                                   required="true"
+                                   requiredMessage="Age required"
+                                   style="margin: 8px;"
+                                   value="#{predictorBean.age}" 
+                                   min="18" max="35" 
+                                   placeholder="Age"
+                                   stepFactor="1"
+                                   suffix=" 🌓" 
+                                   valueChangeListener="#{predictorBean.onValueChangedAge}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_age"
+
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="18" 
+                                  maxValue="35" step="1"/>
+
+                        <span style="color: #747474;
+                              font-size: 0.8rem;  margin-left: 8px; margin-right: 8px;"
+                              > Age 18 - 35 y.o. </span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_bmi"
+
+                                   required="true"
+                                   requiredMessage="BMI required"
+                                   title="Body Mass Index = weight / height²"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.bmi}" 
+                                   min="18.5" max="28.3" 
+                                   placeholder="BMI"
+                                   stepFactor="0.1"
+                                   suffix=" " 
+                                   valueChangeListener="#{predictorBean.onValueChangedBmi}"
+                                   >
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_bmi"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="18.5" 
+                                  maxValue="28.3" step="0.1"/>
+
+                        <span style="color: #747474; font-size: 0.8rem; padding-bottom:6px;  margin-left: 8px; margin-right: 8px;"
+                              > BMI 18.5 - 28.3</span>
+
+                    </p:panelGrid>
+
+                </fieldset>     
+
+                <fieldset style=" border: 1px solid #d3d3d3; padding:20px 10px;  width:fit-content;
+                          min-width: 250px; border-radius: 8px;
+                          background-color: #ffffff;  color: #747474;">
+
+                    <legend style="padding: 0 8px; font-family: Arial;
+                            color: #747474; margin-left: 10px; font-weight: bold;">
+                        Physiological
+                    </legend>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-top:0px;  margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_heartRate"
+                                   title="Pulses per minute."
+                                   required="true"
+                                   requiredMessage="Heart rate required"
+                                   style="margin: 8px;"
+                                   value="#{predictorBean.heartRate}" 
+                                   min="40" max="180" 
+                                   placeholder="Heart rate"
+                                   stepFactor="1"
+                                   suffix=" ♡" 
+                                   valueChangeListener="#{predictorBean.onValueChangedHeartRate}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_heartRate"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="40" 
+                                  maxValue="180" step="1"/>
+
+                        <span style="color: #747474;
+                              font-size: 0.8rem;  margin-left: 8px; margin-right: 8px;"
+                              > Heart rate 40 bpm - 180 bpm </span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_bodyTemperature" 
+                                   required="true"
+                                   title="Temperature of the body in degrees Celcius."
+                                   requiredMessage="Body temperature required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.bodyTemperature}" 
+                                   min="35.8" max="39.2" 
+                                   placeholder="Body temperature"
+                                   stepFactor="0.1"
+                                   suffix=" ℃" 
+                                   valueChangeListener="#{predictorBean.onValueChangedBodyTemperature}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_bodyTemperature"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="35.8" 
+                                  maxValue="39.2" step="0.1"/>
+
+                        <span style="color: #747474; font-size: 0.8rem; padding-bottom:6px;  margin-left: 8px; margin-right: 8px;"
+                              > Body temperature 35.8℃ - 39.2℃</span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_hydrationLevel" 
+                                   title="hydration level represents your total body water percentage relative to your overall body mass. For adult women, an optimal body water percentage typically falls between 45% and 60%. For adult men, the healthy range sits between 50% and 65% due to higher average skeletal muscle mass, which holds significantly more water than adipose tissue."
+                                   required="true"
+                                   requiredMessage="Hydration level required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.hydrationLevel}" 
+                                   min="45" max="100" 
+                                   placeholder="Hydration level"
+                                   stepFactor="1"
+                                   suffix=" %🚰" 
+                                   valueChangeListener="#{predictorBean.onValueChangedHydrationLevel}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_hydrationLevel"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="45" 
+                                  maxValue="100" step="1"/>
+
+                        <span style="color: #747474;
+                              font-size: 0.8rem; margin-left: 8px; margin-right: 8px;"
+                              > Hydration level 25% - 98% </span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_sleepQuality" 
+                                   title="According to the National Sleep Foundation, healthy sleep quality for adults is defined by four key objective metrics:Sleep Onset Latency: Falling asleep in 30 minutes or less after getting into bed.Wake After Sleep Onset (WASO): Waking up fully no more than once per night.Awake Duration: Staying awake for 20 minutes or less total during any nighttime awakenings.Sleep Efficiency: Spending at least 85% of your total time in bed actually asleep."
+                                   required="true"
+                                   requiredMessage="Hours of sleep required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.sleepQuality}" 
+                                   min="2" max="10" 
+                                   placeholder="Sleep quality"
+                                   stepFactor="1"
+                                   suffix=" 💤" 
+                                   valueChangeListener="#{predictorBean.onValueChangedSleepQuality}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_sleepQuality"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="2" 
+                                  maxValue="10" step="1"/>
+
+                        <span style="color: #747474;
+                              font-size: 0.8rem; margin-left: 8px; margin-right: 8px;"
+                              > Sleep quality 2 hrs - 10 hrs</span>
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_recoveryScore"
+                                   required="true"
+                                   requiredMessage="Recovery score required."
+                                   title="A recovery score (often called a readiness score) is a daily rating that measures how physically and physiologically prepared your body is to perform."
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.recoveryScore}" 
+                                   min="25" max="98" 
+                                   placeholder="Recovery score"
+                                   stepFactor="1"
+                                   suffix=" hrs" 
+                                   valueChangeListener="#{predictorBean.onValueChangedRecoveryScore}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_recoveryScore"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="25" 
+                                  maxValue="98" step="1"/>
+
+                        <span style="color: #747474;
+                              font-size: 0.8rem; margin-left: 8px; margin-right: 8px;"
+                              > Recovery score 25 hrs - 98 hrs</span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="spinnerStressLevel" 
+                                   title="Scale --> 1 – 25 (Rest): Your body is calm, recharging, or sleeping.  26 – 50 (Low): Normal daily activity, light work, or mild focus.  51 – 75 (Medium): Moderate mental pressure, intense focus, or physical digestion.  76 – 100 (High): Acute psychological stress, intense anxiety, illness, or heavy alcohol consumption."
+                                   required="true"
+                                   requiredMessage="Stress level required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.stress}" 
+                                   min="0.01" max="0.95" 
+                                   placeholder="Stress"
+                                   stepFactor="0.01"
+                                   suffix=" a.u." 
+                                   valueChangeListener="#{predictorBean.onValueChangedStress}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="spinnerStressLevel" 
+                                  style="margin-left: 8px;margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="0.01" 
+                                  maxValue="0.95" step="0.01"/>
+                        <span style="color: #747474;
+                              font-size: 0.8rem;
+                              margin-left: 8px;margin-right: 8px;">
+                            Stress level 0.01 a.u. - 0.95 a.u. </span>
+
+                    </p:panelGrid>
+
+                </fieldset>      
+
+                <fieldset style=" border: 1px solid #d3d3d3; padding:20px 10px;  width:fit-content; min-width: 250px; border-radius: 8px;
+                          background-color: #ffffff; color: #747474;">
+
+                    <legend style="padding: 0 8px; font-family: Arial;
+                            color: #747474; margin-left: 10px; font-weight: bold;">
+                        Biomechanical
+                    </legend>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-top:0px;  margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_muscleActivity" 
+                                   required="true"
+                                   title="Muscle activity (or muscle activation) is the physiological process where muscle fibers contract and generate force in response to signals from the nervous system. It represents the transition of a muscle from a resting state to an active state, allowing the body to maintain posture, stabilize joints, and execute physical movements.    μV: It is a metric unit of measurement used to quantify very small amounts of electrical voltage. One microvolt is equal to one-millionth of a volt (1 μV = 10⁻⁶ V or 0.000001 V)"
+                                   requiredMessage="Muscle activity required"
+                                   style="margin: 8px;"
+                                   value="#{predictorBean.muscleActivity}" 
+                                   min="10" max="850"
+                                   placeholder="Muscle activity"
+                                   stepFactor="1"
+                                   suffix=" μV" 
+                                   valueChangeListener="#{predictorBean.onValueChangedMuscleActivity}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_muscleActivity"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="10" 
+                                  maxValue="850" step="1"/>
+
+                        <span style="color: #747474;
+                              font-size: 0.8rem;  margin-left: 8px; margin-right: 8px;"
+                              > Muscle activity 10 μV - 850 μV </span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_jointAngles" 
+                                   required="true"
+                                   title="Joint angles track human movement, athletic performance, and rehabilitation progress. They quantify how far a joint moves from a neutral baseline position.Standard Reference PositionIn medicine, angles are calculated based on the Anatomical Position (standing upright, arms at the sides, palms facing forward).Most joints (like the elbows and knees) are considered to be at \(0^{\circ }\) when fully extended in this position.Movement away from this baseline increases or decreases the joint angle."
+                                   requiredMessage="Joint angles required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.jointAngles}" 
+                                   min="45" max="175" 
+                                   placeholder="Hydration level"
+                                   stepFactor="1"
+                                   suffix=" °" 
+                                   valueChangeListener="#{predictorBean.onValueChangedJointAngles}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_jointAngles"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="45" 
+                                  maxValue="175" step="1"/>
+
+                        <span style="color: #747474;
+                              font-size: 0.8rem; margin-left: 8px; margin-right: 8px;"
+                              > Joint angles  45 degrees - 175 degrees</span>
+
+                    </p:panelGrid>    
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_gaitSpeed"
+                                   required="true"
+                                   title="Gait speed is the time it takes an individual to walk a specific distance, typically measured in meters per second (m/s)."
+                                   requiredMessage="Gait speed required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.gaitSpeed}" 
+                                   min="0.8" max="3.5" 
+                                   placeholder="Gait speed"
+                                   stepFactor="0.1"
+                                   suffix=" m/s" 
+                                   valueChangeListener="#{predictorBean.onValueChangedGaitSpeed}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_gaitSpeed"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="0.8" 
+                                  maxValue="3.5" step="0.1"/>
+
+                        <span style="color: #747474; font-size: 0.8rem; padding-bottom:6px;  margin-left: 8px; margin-right: 8px;"
+                              > Gait speed 0.8 m/s - 3.5 m/s</span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_cadence" 
+                                   required="true"
+                                   title="Cadence is the rate or rhythm at which a repetitive action occurs, measured by the number of repetitions per minute."
+                                   requiredMessage="Cadence required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.cadence}" 
+                                   min="50" max="200" 
+                                   placeholder="Cadence"
+                                   stepFactor="1"
+                                   suffix=" 🏃" 
+                                   valueChangeListener="#{predictorBean.onValueChangedCadence}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_cadence"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="50" 
+                                  maxValue="200" step="1"/>
+
+                        <span style="color: #747474;
+                              font-size: 0.8rem; margin-left: 8px; margin-right: 8px;"
+                              > Cadence  50 steps/min - 200 steps/min</span>
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_stepCount" 
+                                   required="true"
+                                   title="Step count is the total number of steps a person takes per day. Taking fewer than 5,000 steps per day is generally classified as a sedentary lifestyle, which is linked to higher cardiovascular risks."
+                                   requiredMessage="Step count required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.stepCount}" 
+                                   min="2000" max="15000" 
+                                   placeholder="Step count"
+                                   stepFactor="1"
+                                   suffix=" 👣" 
+                                   valueChangeListener="#{predictorBean.onValueChangedStepCount}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_stepCount"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="2000" 
+                                  maxValue="15000" step="1"/>
+
+                        <span style="color: #747474;
+                              font-size: 0.8rem; margin-left: 8px; margin-right: 8px;"
+                              >Step count 2000 - 15000</span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_jumpHeight"
+                                   required="true"
+                                   title="Jump height is the vertical distance a person's center of mass rises during a jump, measured from the highest point reached down to the takeoff position."
+                                   requiredMessage="Jump height required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.jumpHeight}" 
+                                   min="0.15" max="0.85" 
+                                   placeholder="Jump height"
+                                   stepFactor="0.01"
+                                   suffix=" m" 
+                                   valueChangeListener="#{predictorBean.onValueChangedJumpHeight}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_jumpHeight" 
+                                  style="margin-left: 8px;margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="0.15" 
+                                  maxValue="0.85" step="0.01"/>
+                        <span style="color: #747474;
+                              font-size: 0.8rem;
+                              margin-left: 8px;margin-right: 8px;">
+                            Jump height 0.15 m - 0.85 m </span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_groundReactionForce" 
+                                   required="true"
+                                   title="Ground Reaction Force (GRF) is the force exerted by the ground on a body in contact with it. It is a direct application of Newton's Third Law of Motion, which states that for every action, there is an equal and opposite reaction. "
+                                   requiredMessage="Ground rection force required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.groundReactionForce}" 
+                                   min="800" max="2800" 
+                                   placeholder="Ground reaction force"
+                                   stepFactor="1"
+                                   suffix=" N" 
+                                   valueChangeListener="#{predictorBean.onValueChangedGroundReactionForce}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_groundReactionForce" 
+                                  style="margin-left: 8px;margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="800" 
+                                  maxValue="2800" step="1"/>
+                        <span style="color: #747474;
+                              font-size: 0.8rem;
+                              margin-left: 8px;margin-right: 8px;">
+                            Ground reaction force 800 N -2800 N </span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_rangeOfMotion"
+                                   required="true"
+                                   title="Range of Motion (ROM) is the linear or angular distance a joint can move between its fully extended and fully flexed positions.It is measured in degrees using a specialized tool called a goniometer to evaluate joint flexibility, muscle balance, and overall mobility."
+                                   requiredMessage="Range of motion required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.rangeOfMotion}" 
+                                   min="60" max="180" 
+                                   placeholder="Range of motion"
+                                   stepFactor="1"
+                                   suffix=" °" 
+                                   valueChangeListener="#{predictorBean.onValueChangedRangeOfMotion}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_rangeOfMotion" 
+                                  style="margin-left: 8px;margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="60" 
+                                  maxValue="180" step="1"/>
+                        <span style="color: #747474;
+                              font-size: 0.8rem;
+                              margin-left: 8px;margin-right: 8px;">
+                            Range of motion 60 degrees - 180 degrees</span>
+
+                    </p:panelGrid>
+
+                </fieldset>  
+
+                <fieldset style=" border: 1px solid #d3d3d3; padding:20px 10px;  width:fit-content; min-width: 250px; border-radius: 8px;
+                          background-color: #ffffff; color: #747474;">
+
+                    <legend style="padding: 0 8px; font-family: Arial;
+                            color: #747474; margin-left: 10px; font-weight: bold;">
+                        Environmental / Workload
+                    </legend>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 20px; width: 100%;">   
+
+
+                        <p:selectOneRadio id="id_playingSurface" 
+                                          required="true"
+                                          requiredMessage="Playing surface required"
+                                          value="#{predictorBean.playingSurface}"
+                                          columns="2" 
+                                          layout="responsive">
+
+                            <f:selectItem itemLabel="Grass" 
+                                          itemValue="GRASS" />
+                            <f:selectItem itemLabel="Turf" itemValue="TURF" />
+                            <f:selectItem itemLabel="Indoor" itemValue="INDOOR" />
+                            <f:selectItem itemLabel="Track" itemValue="TRACK" /> 
+                            <f:selectItem itemLabel="Other" itemValue="OTHER" />          
+
+                            <p:ajax event="valueChange" 
+                                    process="@this" update="id_growl" 
+                                    listener="#{predictorBean.onClickedPlayingSurface}"/>
+                        </p:selectOneRadio>      
+                    </p:panelGrid> 
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+
+                        <p:spinner id="id_ambientTemperature"
+                                   required="true"
+                                   title="Ambient temperature is the overall temperature of the immediate surrounding air or environment enveloping an object, person, or piece of equipment. It is simply the 'room temperature' or the outdoor air temperature at any given time and place, completely independent of any direct heat source."
+                                   requiredMessage="Ambient temperature required"
+                                   style="margin: 8px;"
+                                   value="#{predictorBean.ambientTemperature}" 
+                                   min="15" max="38"
+                                   placeholder="Ambient temperature"
+                                   stepFactor="1"
+                                   suffix=" °C" 
+                                   valueChangeListener="#{predictorBean.onValueChangedAmbientTemperature}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_ambientTemperature"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="15" 
+                                  maxValue="38" step="1">
+                        </p:slider>
+
+                        <span style="color: #747474;
+                              font-size: 0.8rem;  margin-left: 8px; margin-right: 8px;"
+                              > Ambient temperature 15°C - 38°C</span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_humidity" 
+                                   title="Relative Humidity (RH): It is expressed as a percentage (%) and measures the current amount of water vapor in the air relative to the maximum amount the air could hold at that specific temperature."
+                                   required="true"
+                                   requiredMessage="Humidity percentage required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.humidity}" 
+                                   min="30" max="85" 
+                                   placeholder="Humidity"
+                                   stepFactor="1"
+                                   suffix=" %" 
+                                   valueChangeListener="#{predictorBean.onValueChangedHumidity}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_humidity"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="30" 
+                                  maxValue="85" step="1"/>
+
+                        <span style="color: #747474;
+                              font-size: 0.8rem; margin-left: 8px; margin-right: 8px;"
+                              > Humidity 30% - 85%</span>
+
+                    </p:panelGrid>    
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_altitude"
+                                   title="The actual physical height of an object above Mean Sea Level (MSL). "
+                                   required="true"
+                                   requiredMessage="Altitude required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.altitude}" 
+                                   min="0" max="1200" 
+                                   placeholder="Altitude"
+                                   stepFactor="1"
+                                   suffix=" m" 
+                                   valueChangeListener="#{predictorBean.onValueChangedAltitude}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_altitude"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="0" 
+                                  maxValue="1200" step="1"/>
+
+                        <span style="color: #747474; font-size: 0.8rem; padding-bottom:6px;  margin-left: 8px; margin-right: 8px;"
+                              > Altitude 0 m - 1200 m</span>
+
+                    </p:panelGrid>    
+
+
+                    <div class="line-container">
+                        <span class="line-title">Workload</span>
+                    </div>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_trainingIntensity" 
+                                   title="Training intensity is the measure of how much effort, energy, or power you expend during a physical workout relative to your maximum capability. While training volume tracks how much you did (reps, sets, or distance), intensity defines how hard you worked during that activity.Rate of Perceived Exertion (RPE): A subjective scale from 1 to 10 based on how hard the exercise feels, where 1 is sitting on a couch and 10 is an all-out sprint."
+                                   required="true"
+                                   requiredMessage="Training intensity required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.trainingIntensity}" 
+                                   min="2" max="10" 
+                                   placeholder="Training intensity"
+                                   stepFactor="0.1"
+                                   suffix=" RPE" 
+                                   valueChangeListener="#{predictorBean.onValueChangedTrainingIntensity}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_trainingIntensity"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="2" 
+                                  maxValue="10" step="0.1"/>
+
+                        <span style="color: #747474; font-size: 0.8rem; padding-bottom:6px;  margin-left: 8px; margin-right: 8px;"
+                              > Training intensity 2 RPE - 10 RPE</span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_trainingDuration"
+                                   title="Training duration is the total length of time spent executing a physical workout or structured exercise session. While training intensity tracks how hard you work, duration measures the exact timeframe of that effort, usually recorded in minutes or hours. Vigorous Intensity: Adults should aim for a minimum duration of 75 to 150 minutes of vigorous-intensity aerobic activity per week (e.g., running)."
+                                   required="true"
+                                   requiredMessage="Training duration required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.trainingDuration}" 
+                                   min="30" max="180" 
+                                   placeholder="Training duration"
+                                   stepFactor="1"
+                                   suffix=" min" 
+                                   valueChangeListener="#{predictorBean.onValueChangedTrainingDuration}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_trainingDuration"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="30" 
+                                  maxValue="180" step="1"/>
+
+                        <span style="color: #747474; font-size: 0.8rem; padding-bottom:6px;  margin-left: 8px; margin-right: 8px;"
+                              > Training duration 30 min - 180 min</span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_trainingLoad" 
+                                   title="Training load is a sports science metric that quantifies the total physical stress placed on an athlete during a workout or over a training period. It combines how long you exercised (duration) with how hard you worked (intensity) into a single, measurable value to help athletes optimize performance and avoid overtraining. Mathematical FormulaIdentify the variables: To calculate the training load of a single session, you need the total duration of the workout in minutes (t) and the athlete's subjective RPE intensity score (I) on the 1–10 scale.Apply the product equation: Multiply the session duration by the intensity score. Training Load (AU) = Duration(minutes)  X  RPE (Intensity Score})"
+                                   required="true"
+                                   requiredMessage="Training load required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.trainingLoad}" 
+                                   min="150" max="1800" 
+                                   placeholder="Training load"
+                                   stepFactor="1"
+                                   suffix=" a.u." 
+                                   valueChangeListener="#{predictorBean.onValueChangedTrainingLoad}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_trainingLoad"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="150" 
+                                  maxValue="1800" step="1"/>
+
+                        <span style="color: #747474; font-size: 0.8rem; padding-bottom:6px;  margin-left: 8px; margin-right: 8px;"
+                              > Training load 150 a.u. - 1800 a.u.</span>
+
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="1" 
+                                 columnClasses="ui-panelgrid-nopad"
+                                 style="margin-bottom: 5px; width: 100%;">   
+
+                        <p:spinner id="id_fatigueIndex"
+                                   title="Fatigue index is a sports science metric that measures the rate at which an athlete's muscular power declines during a high-intensity, short-duration anaerobic workout (such as an all-out sprint). It indicates your muscles' fatigue resistance and anaerobic capacity, showing how well you can maintain peak power under extreme metabolic stress. Low Fatigue Index (Under 40%): Indicates a high level of fatigue resistance. Athletes with a low index can maintain their power output close to their peak for the duration of the sprint. "
+                                   required="true"
+                                   requiredMessage="Fatigue index required"
+                                   style="margin: 20px 8px 8px 8px;"
+                                   value="#{predictorBean.fatigueIndex}" 
+                                   min="15" max="85" 
+                                   placeholder="Fatigue tndex"
+                                   stepFactor="0.1"
+                                   suffix=" 😫" 
+                                   valueChangeListener="#{predictorBean.onValueChangedFatigueIndex}">
+                            <p:ajax process="@this" update="id_growl"/>
+                        </p:spinner>
+
+                        <p:slider for="id_fatigueIndex"
+                                  style="margin-left: 8px; margin-right: 8px; margin-bottom: 2px;"
+                                  minValue="15" 
+                                  maxValue="85" step="0.1"/>
+
+                        <span style="color: #747474; font-size: 0.8rem; padding-bottom:6px;  margin-left: 8px; margin-right: 8px;"
+                              > Fatigue index 15 - 85 score </span>
+
+                    </p:panelGrid> 
+
+                </fieldset>  
+            </div> 
+
+        </h:form>
+
+
+        <!---  
+├── Environmental (4 features)
+│   ├── ambient_temperature (15-38 °C)
+│   ├── humidity (30-85%)
+│   ├── altitude (0-1200 m)
+│   └── playing_surface (0-4 categorical) 
+        Surface type (0=Grass, 1=Turf, 2=Indoor, 3=Track, 4=Other)
+        
+├── Workload (4 features)
+│   ├── training_intensity (2-10 RPE)
+│   ├── training_duration (30-180 min)
+│   ├── training_load (150-1800 a.u.)
+│   └── fatigue_index (15-85 score)   
+        -->
+
+
+        <footer class="asdvFooter" style="text-align: center;">
+            &copy; 2026 ASDV @ South Louisiana Community College. All rights reserved.
+            <span style="display: block; margin-top: 5px; color: #747474; font-family: 'Brush Script MT', cursive; font-size: 0.9rem; ">
+                We develop software with style...
+            </span>
+        </footer>
+    </h:body>
+</html>
